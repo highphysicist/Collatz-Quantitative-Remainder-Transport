@@ -1,0 +1,31 @@
+name = "CollatzPredecessorDensity"
+version = "1.0.0"
+defaultTargets = ["CollatzPredecessorDensity"]
+
+[leanOptions]
+pp.unicode.fun = true
+autoImplicit = false
+relaxedAutoImplicit = false
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "5450b53e5ddc75d46418fabb605edbf36bd0beb6"
+
+[[lean_lib]]
+name = "CollatzPredecessorDensity"
+
+[[lean_lib]]
+name = "Erdos1135"
+
+[[lean_lib]]
+name = "FormalConjectures"
+
+[[lean_lib]]
+name = "Verification"
+
+[[lean_lib]]
+name = "ERE"
+
+[[lean_lib]]
+name = "QRT"

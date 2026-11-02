@@ -1,0 +1,11 @@
+import QRT
+
+#print axioms ERE.quantitative_remainder_transport_finite
+#print axioms ERE.effective_remainder_transport_factorized
+#print axioms Erdos1135.ND.PositiveDensity.explicitPositiveDensityOddUnitSeedCount_ten46
+#print axioms EREQuantitativeTransport.explicit_logarithmic_remainder_transport_ten46
+#print axioms EREQuantitativeTransport.direct_to_one_logarithmic_count_ten46
+#print axioms EREQuantitativeTransport.direct_to_one_count_of_selector
+#print axioms EREQuantitativeTransport.direct_to_one_logarithmic_count_coprime_six
+#print axioms EREQuantitativeTransport.direct_to_one_logarithmic_count_pow_three
+#print axioms EREQuantitativeTransport.direct_to_one_logarithmic_count_factorized

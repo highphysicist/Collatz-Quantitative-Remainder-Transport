@@ -1,0 +1,23 @@
+note: using toolchain 'leanprover/lean4:v4.30.0-rc2' from override set on '/content/mazur-ere-integration'
+note: to remove: elan override unset --path '/content/mazur-ere-integration' | to suppress: ELAN_NO_OVERRIDE_NOTICE=1
+'ERE.quantitative_remainder_transport_finite' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ERE.effective_remainder_transport_factorized' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Erdos1135.ND.PositiveDensity.explicitPositiveDensityOddUnitSeedCount_ten46' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'EREQuantitativeTransport.explicit_logarithmic_remainder_transport_ten46' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'EREQuantitativeTransport.direct_to_one_logarithmic_count_ten46' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'EREQuantitativeTransport.direct_to_one_count_of_selector' depends on axioms: [propext, Classical.choice, Quot.sound]
+'EREQuantitativeTransport.direct_to_one_logarithmic_count_coprime_six' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'EREQuantitativeTransport.direct_to_one_logarithmic_count_pow_three' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'EREQuantitativeTransport.direct_to_one_logarithmic_count_factorized' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

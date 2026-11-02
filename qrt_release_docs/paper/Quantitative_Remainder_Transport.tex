@@ -1,0 +1,373 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage[hidelinks]{hyperref}
+\usepackage{microtype}
+\usepackage{enumitem}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\N}{\mathbb N}
+\newcommand{\Col}{\operatorname{Col}}
+\newcommand{\Reach}{\rightsquigarrow}
+\newcommand{\card}[1]{\lvert #1\rvert}
+
+\title{Quantitative Remainder Transport in Collatz Dynamics}
+\author{Shreyas Samir Kolte}
+\date{November 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Let $\Col(n)=n/2$ for even $n$ and $\Col(n)=3n+1$ for odd $n$.
+We combine an explicit positive-density theorem for Collatz convergence in
+logarithmic time with effective residue transport in inverse Collatz trees.
+For every modulus $N\ge 1$, every residue $r\pmod N$, and every sufficiently
+large parameter $X$, we construct a finite set $W_{N,r}(X)$ of distinct
+integers such that every $n\in W_{N,r}(X)$ satisfies
+\[
+ n\equiv r\pmod N,\qquad n\Reach 1,
+\]
+and
+\[
+ \card{W_{N,r}(X)}\ge
+ \frac{\delta X}{2(\lceil (523/50)\log X\rceil+4)}.
+\]
+Here $\delta>0$ and the cutoff are the explicit constants in Mazur's
+positive-density formalization.  The general construction gives
+\[
+ n\le (3X+1)2^{2^{48N^4}},
+\]
+and we prove substantially sharper bounds when $N$ is coprime to $6$, when
+$N$ is a power of $3$, and when a factorization certificate for $N$ and the
+target residue is supplied.  All principal statements are formalized in Lean
+4.30.0-rc2 and their axiom reports contain only \texttt{propext},
+\texttt{Classical.choice}, and \texttt{Quot.sound}.  The result does not prove
+the Collatz conjecture or positive density inside each residue class; it
+isolates orbit coalescence as the source of the logarithmic loss.
+\end{abstract}
+
+\section{Introduction}
+The Collatz map is the function $\Col:\N_{>0}\to\N_{>0}$ defined by
+\[
+ \Col(n)=\begin{cases}n/2,&2\mid n,\\3n+1,&2\nmid n.\end{cases}
+\]
+The Collatz conjecture asserts that every positive integer eventually reaches
+$1$.  Although the rule is elementary, its forward and inverse dynamics
+combine deterministic arithmetic with behavior that repeatedly resembles a
+mixing process.  This resemblance is useful but dangerous: qualitative
+coverage of residue classes is much weaker than equidistribution, and neither
+implies universal convergence.
+
+This paper studies a precise interface between two rigorous phenomena.  The
+first is abundance: a fixed explicit positive proportion of starting values
+reaches $1$ within $(523/50)\log n$ ordinary Collatz steps.  The second is
+transport: for a target not divisible by $3$, a predecessor can be found in
+every prescribed residue class, with an explicit upper bound.  Applying
+transport separately to many fast-convergent targets does not automatically
+produce equally many distinct predecessors, because several targets may lie
+on one forward orbit.  We prove that the multiplicity is at most logarithmic,
+which yields an explicit $X/\log X$ family in every residue class.
+
+The central conclusion is therefore stronger than the qualitative assertion
+that every residue occurs infinitely often in an inverse tree.  It gives a
+finite, explicit, growing population of integers in each residue class that
+are certified to reach $1$.
+
+\section{Prior work}
+Terras proved fundamental density results for finite stopping time, with
+related work by Everett.  Wirsching developed a systematic analysis of the
+inverse Collatz graph and later formulated the positive-predecessor-density
+problem.  Tao proved that almost all Collatz orbits attain any prescribed
+diverging bound, in logarithmic density, by an approximate transport argument
+for the Syracuse map.
+
+Mazur subsequently gave an explicit positive-density theorem in logarithmic
+ordinary time: there are explicit constants $\delta>0$ and $X_0$ such that,
+for every $X\ge X_0$, at least $\delta X$ positive integers below $X$ reach
+$1$ within $(523/50)\log n$ steps.  A separate predecessor-density result
+shows positive lower density for the predecessors of each fixed target not
+divisible by $3$.
+
+Hallqvist's Every Remainder Everywhere theorem proves that the inverse tree of
+every target not divisible by $3$ meets every residue class modulo every
+modulus infinitely often.  Its effective version supplies the explicit
+general witness bound used here.  These results address modular accessibility,
+not the number of distinct transported witnesses obtained from a population
+of targets.
+
+Lau and AxiomProver recently made positive-density constants more explicit and
+proved target-specific predecessor results.  Those results concern abundance
+for a prescribed target.  The present theorem addresses a different axis:
+simultaneous quantitative transport into each prescribed congruence class.
+No claim of priority beyond the exact residue-wise statements formalized here
+is made.
+
+\section{Definitions}
+Write $a\Reach b$ when an iterate of $\Col$ starting at $a$ equals $b$.
+For $C\ge0$ and $X\in\N$, let
+\[
+ \mathcal F_C(X)=\{n<X:n\text{ is odd and reaches }1
+       \text{ in at most }C\log n\text{ steps}\}.
+\]
+Define the live-target map
+\[
+ L(n)=\begin{cases}3n+1,&3\mid n,\\n,&3\nmid n.\end{cases}
+\]
+For odd $n$, either $L(n)=n$ or $L(n)=\Col(n)$.  Thus $L(n)$ is not divisible
+by $3$, reaches $1$, and requires no more steps to reach $1$ than $n$ does.
+Let
+\[
+ \mathcal T_C(X)=L(\mathcal F_C(X)).
+\]
+The map $L$ has fibres of size at most two on odd inputs, hence
+\begin{equation}\label{eq:live-count}
+ \card{\mathcal F_C(X)}\le2\card{\mathcal T_C(X)}.
+\end{equation}
+
+\section{The orbit-fibre bound}
+Suppose a selector $s$ assigns to each $w\in\mathcal T_C(X)$ a predecessor
+$s(w)$ with $s(w)\Reach w$.  If $s(u)=s(v)$, then both $u$ and $v$ occur on
+the same forward orbit, namely the orbit of the common selected predecessor.
+If every target reaches $1$ within $B$ steps, all such targets lie among a
+prefix of length $B+1$ together with the terminal cycle $1,4,2$.  Consequently
+each fibre of $s$ has cardinality at most $B+4$.
+
+\begin{proposition}[Selected-witness counting]
+If every $w$ in a finite target set $S$ reaches $1$ within $B$ steps and
+$s(w)\Reach w$, then
+\[
+ \card S\le \card{s(S)}(B+4).
+\]
+\end{proposition}
+
+For $C=523/50$, one may take
+\[
+ B=B(X)=\left\lceil\frac{523}{50}\log X\right\rceil.
+\]
+Combining the proposition with \eqref{eq:live-count} gives
+\begin{equation}\label{eq:collision}
+ \card{\mathcal F_{523/50}(X)}
+ \le2\card{s(\mathcal T_{523/50}(X))}(B(X)+4).
+\end{equation}
+
+\section{Effective residue transport}
+Effective Remainder Everywhere supplies, for every $N\ge1$, residue $r$, and
+live target $w$, a selected predecessor $s_{N,r}(w)$ such that
+\[
+ s_{N,r}(w)\Reach w,\qquad s_{N,r}(w)\equiv r\pmod N,
+\]
+with
+\begin{equation}\label{eq:generic-bound}
+ s_{N,r}(w)\le w2^{2^{48N^4}}.
+\end{equation}
+Since every target in $\mathcal T_C(X)$ is below $3X+1$, the right-hand side
+of \eqref{eq:generic-bound} is at most
+$(3X+1)2^{2^{48N^4}}$.
+
+\section{Main theorems}
+Let $\delta>0$ and $X_0$ be Mazur's explicit density constant and cutoff.
+
+\begin{theorem}[Quantitative direct-to-one remainder transport]
+For every $N\ge1$, $r\in\N$, and $X\ge X_0$, there is a finite set
+$W_{N,r}(X)$ satisfying
+\[
+ \card{W_{N,r}(X)}\ge
+ \frac{\delta X}{2(B(X)+4)}.
+\]
+Every $m\in W_{N,r}(X)$ satisfies
+\[
+ m\equiv r\pmod N,\qquad m\Reach1,
+ \qquad m\le(3X+1)2^{2^{48N^4}}.
+\]
+\end{theorem}
+
+\begin{proof}
+Mazur's theorem gives
+$\delta X\le\card{\mathcal F_{523/50}(X)}$.  Apply the effective residue
+selector to every live target and then use \eqref{eq:collision}.  The selected
+image is a finite set of distinct integers in the prescribed residue.  Each
+selected integer reaches its target and each target reaches $1$, so
+transitivity gives convergence to $1$.  The numerical bound follows from
+\eqref{eq:generic-bound} and $w<3X+1$.
+\end{proof}
+
+\begin{theorem}[Coprime-to-six refinement]
+If $\gcd(N,6)=1$, the same cardinality conclusion holds with
+\[
+ m\le(3X+1)2^{2^{15(3N^2)}}
+       =(3X+1)2^{2^{45N^2}}.
+\]
+\end{theorem}
+
+\begin{theorem}[Power-of-three refinement]
+For $N=3^b$, the same cardinality conclusion holds with
+\[
+ m\le(3X+1)2^{2^{15(3\cdot3^b)}}
+       =(3X+1)2^{2^{45N}}.
+\]
+\end{theorem}
+
+\begin{theorem}[Factor-sensitive refinement]
+Let $N=2^\alpha3^bM$ with $\gcd(M,6)=1$, and suppose a certified parity word
+and auxiliary integers satisfy the hypotheses of the formal factorized
+transport theorem.  If $Z$ is the resulting effective scale, then the same
+cardinality conclusion holds with
+\[
+ m\le2N(3X+1)2^{2^{15Z}}.
+\]
+The complete arithmetic certificate is stated in the Lean declaration
+\texttt{direct\_to\_one\_logarithmic\_count\_factorized}.
+\end{theorem}
+
+\section{What the theorem means for Collatz dynamics}
+The theorem gives a quantitative form of modular permeability.  No fixed
+congruence class can be only sparsely accessible in the qualitative sense of
+having a few exceptional predecessors: every class receives an explicitly
+growing family of certified convergent integers.
+
+This should not be confused with uniform randomness.  The result neither
+compares different residue classes nor proves that their counts have an
+asymptotic ratio of one.  The construction may be highly biased and its
+numerical bounds are enormous.  What it rules out is a broad family of purely
+modular obstructions to convergence-to-one membership.
+
+The logarithmic denominator has a dynamical interpretation.  Effective
+residue transport itself does not cause the loss.  The loss arises because
+different fast targets can lie on the same orbit and therefore select the same
+predecessor.  A Collatz orbit segment of logarithmic length can absorb at most
+logarithmically many targets.  Thus the remaining step from the present
+$X/\log X$ guarantee to a positive-density guarantee in each residue class is
+a concrete multiplicity problem, not a modular reachability problem.
+
+In a physical or statistical-mechanical analogy, the inverse dynamics has
+full modular support but has not been shown to have a uniform stationary
+distribution.  Coverage is analogous to irreducibility; positive density or
+equidistribution would require quantitative control of mass concentration.
+This analogy is interpretive only and is not used in the proof.
+
+\section{Relation to the full Collatz conjecture}
+The theorem does not prove that every integer reaches $1$, that almost every
+integer in each residue reaches $1$, or even that the convergent integers have
+positive lower density within each residue class.  Its exact finite lower
+bound is of order $X/\log X$ in the target parameter, while transported
+witnesses lie below a modulus-dependent constant multiple of $X$.
+
+Nevertheless, the theorem sharpens the map of what a counterexample mechanism
+would have to accomplish.  It cannot rely merely on excluding a residue class
+from convergent inverse trees.  Any persistent nonconvergent component must
+coexist with quantitatively many convergent starts in every congruence class.
+
+\section{Further directions}
+The most immediate problem is to replace the worst-case fibre bound $B+4$ by
+a constant or a bounded average on a positive-density subfamily.  Such a result
+would upgrade the construction toward positive density in every residue
+class.  Computational experiments can measure fibre histograms for different
+target selections and test whether collision multiplicity remains bounded,
+has a light tail, or grows logarithmically.
+
+Other directions include optimizing the enormous effective transport bounds,
+comparing counts across residue classes, transporting stronger stopping-time
+distributions, and replacing the external Effective Remainder Everywhere
+dependency with an independent formalization.
+
+\section{Lean formalization}
+The development uses Lean 4.30.0-rc2 with a pinned Mathlib revision.  The
+principal declarations are:
+\begin{itemize}[leftmargin=2em]
+\item \texttt{explicit\_logarithmic\_remainder\_transport\_ten46};
+\item \texttt{direct\_to\_one\_logarithmic\_count\_ten46};
+\item \texttt{direct\_to\_one\_count\_of\_selector};
+\item \texttt{direct\_to\_one\_logarithmic\_count\_coprime\_six};
+\item \texttt{direct\_to\_one\_logarithmic\_count\_pow\_three};
+\item \texttt{direct\_to\_one\_logarithmic\_count\_factorized}.
+\end{itemize}
+For each, \texttt{\#print axioms} reports only \texttt{propext},
+\texttt{Classical.choice}, and \texttt{Quot.sound}.  No \texttt{sorry} or
+\texttt{admit} occurs in the audited theorem modules.
+
+The initial public release does not redistribute Hallqvist's unlicensed Lean
+source.  It records that source as an external prerequisite by repository URL,
+filename, and hash.  Mazur's required source closure is redistributed under
+its Apache-2.0 terms with its notice retained.
+
+\section*{Authorship and AI disclosure}
+The project architecture, selection of the synthesis problem, iterative
+verification process, theorem packaging, and publication are attributed to
+the named author.  OpenAI language models accessed through ChatGPT/Codex
+contributed substantially to mathematical exploration, Lean proof generation,
+debugging, and manuscript drafting.  The upstream Mazur development also
+discloses substantial generative-AI assistance, and Lau's refinement discloses
+autonomous AxiomProver contributions.  AI systems are not listed as authors or
+independent referees.  The named author assumes responsibility for the claims
+and released artifacts.
+
+\begin{thebibliography}{99}
+\bibitem{Everett1977}
+C.~J. Everett,
+\emph{Iteration of the number-theoretic function $f(2n)=n$, $f(2n+1)=3n+2$},
+Advances in Mathematics 25 (1977), 42--45.
+
+\bibitem{HallqvistERE}
+A. Hallqvist,
+\emph{Every Remainder Everywhere}, 2026,
+Zenodo, DOI: \href{https://doi.org/10.5281/zenodo.23757322}{10.5281/zenodo.23757322}.
+
+\bibitem{HallqvistEffective}
+A. Hallqvist,
+\emph{Effective Remainder Everywhere}, GitHub repository, 2026,
+\url{https://github.com/Sio-MLST/Effective-Remainder-Everywhere}.
+
+\bibitem{Lau2026}
+K. Lau,
+\emph{Explicit positive lower density for the Collatz Conjecture},
+Hexagon 2610.00249, version 2, 2026.
+
+\bibitem{MazurLog}
+L. Mazur,
+\emph{Explicit Positive-Density Collatz Convergence in Logarithmic Time},
+manuscript version 2.1, 2026; formal source archived by ProofAtlas.
+
+\bibitem{MazurPred}
+L. Mazur,
+\emph{Positive Lower Density of Collatz Predecessors},
+manuscript, 2026; formal source archived by ProofAtlas.
+
+\bibitem{Tao2022}
+T. Tao,
+\emph{Almost all orbits of the Collatz map attain almost bounded values},
+Forum of Mathematics, Pi 10 (2022), e12,
+DOI: \href{https://doi.org/10.1017/fmp.2022.8}{10.1017/fmp.2022.8}.
+
+\bibitem{Terras1976}
+R. Terras,
+\emph{A stopping time on the positive integers},
+Acta Arithmetica 30 (1976), 241--252.
+
+\bibitem{Terras1979}
+R. Terras,
+\emph{On the existence of a density},
+Acta Arithmetica 35 (1979), 101--102.
+
+\bibitem{Wirsching1998}
+G. J. Wirsching,
+\emph{The Dynamical System Generated by the $3n+1$ Function},
+Lecture Notes in Mathematics, Springer, 1998,
+DOI: \href{https://doi.org/10.1007/BFb0095985}{10.1007/BFb0095985}.
+
+\bibitem{Wirsching2003}
+G. J. Wirsching,
+\emph{On the problem of positive predecessor density in $3n+1$ dynamics},
+Discrete and Continuous Dynamical Systems 9 (2003), 771--787,
+DOI: \href{https://doi.org/10.3934/dcds.2003.9.771}{10.3934/dcds.2003.9.771}.
+\end{thebibliography}
+
+\end{document}

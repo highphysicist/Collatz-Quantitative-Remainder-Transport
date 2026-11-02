@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this software or its theorems, please cite this record."
+title: "Quantitative Remainder Transport in Collatz Dynamics"
+type: software
+authors:
+  - family-names: Kolte
+    given-names: Shreyas Samir
+date-released: 2026-11-02
+version: 1.0.0
+repository-code: "https://github.com/highphysicist/Collatz-Quantitative-Remainder-Transport"
+license: Apache-2.0
+keywords:
+  - Collatz conjecture
+  - Lean 4
+  - residue classes
+  - inverse trees
+  - formal verification
+abstract: >-
+  Lean-verified quantitative residue-class counts for integers whose ordinary
+  Collatz trajectories reach one, with explicit general and factor-sensitive
+  witness bounds.
+
