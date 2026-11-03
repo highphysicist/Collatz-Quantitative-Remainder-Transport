@@ -68,6 +68,54 @@ contains no explicit redistribution license. See
 Mazur's required formal source closure is included under its Apache-2.0 terms,
 with its original `LICENSE` and `NOTICE` retained.
 
+## What this contributes to understanding Collatz
+
+A useful way to picture Collatz is as a huge directed forest: every number has
+one forward path, while many possible paths may run backward into the same
+target.
+
+Hallqvist's result showed that, if a target is not divisible by `3`, its
+backward tree eventually enters every residue class modulo every `N`. In simple
+terms, no modular clock position is permanently missing.
+
+Mazur's result showed that a fixed positive proportion of integers reach `1`
+quickly—within a constant times `log n` ordinary Collatz steps.
+
+The ten QRT theorem stages connect these two facts quantitatively. They show
+that, for every modulus and every chosen remainder, there is not merely one
+exceptional integer in that remainder class that reaches `1`. There is an
+explicitly growing family of distinct such integers, together with explicit
+upper bounds on how large the constructed integers may be.
+
+This changes the picture in three ways:
+
+1. **Modular access is abundant, not merely possible.**  
+   Congruence conditions alone cannot isolate a residue class from the
+   convergent part of Collatz dynamics.
+
+2. **The main loss is caused by paths merging.**  
+   Different quickly convergent targets can lie on the same Collatz orbit and
+   therefore produce the same transported witness. The proof controls this
+   overlap by the orbit length, which is why the present count contains a
+   `log X` denominator.
+
+3. **The next obstruction is now concrete.**  
+   To improve the result from roughly `X / log X` witnesses to a positive
+   proportion of witnesses in every residue class, it would be enough to
+   control this merging multiplicity more strongly—uniformly, on average, or
+   on a sufficiently large subfamily.
+
+The theorem therefore does not solve the Collatz conjecture, but it narrows the
+search. A future counterexample mechanism cannot be explained simply by saying
+that convergent inverse trees avoid certain congruence classes. They do not:
+every residue class contains quantitatively many certified starts that reach
+`1`.
+
+Natural extensions include improving the enormous effective size bounds,
+measuring and bounding orbit-collision multiplicities, comparing the counts in
+different residue classes, and ultimately asking whether every residue class
+contains a positive-density set of integers that reaches `1`.
+
 ## What this does not prove
 
 This work does not prove the Collatz conjecture, density-one convergence, or
